@@ -1,13 +1,22 @@
-function getPrimesUpTo(num) {
-  const composites = new Set()
-  for (i=2; i<=Math.sqrt(num); i++) {
-    if (i > 2 && i%2 === 0) continue;
-    if (composites.has(i)) continue;
-    for (j=2; i*j<=num; j++) {
-      composites.add(i*j)
-    }
+function markComposites(num, start=2, composites=new Set()) {
+  if (start>=Math.sqrt(num)) return composites
+
+  if (start > 2 && start%2 === 0)
+  return markComposites(num, start+1, composites)
+
+  if (composites.has(start))
+  return markComposites(num, start+1, composites)
+  
+  for (j=2; start*j<=num; j++) {
+    composites.add(start*j)
   }
 
+  return markComposites(num, start+1, composites)
+}
+
+function getPrimesUpTo(num) {  
+  
+  const composites = markComposites(num)
   const primes = []
   for (k=2; k<=num; k++) {
     if (!composites.has(k)) {
@@ -17,6 +26,20 @@ function getPrimesUpTo(num) {
   return primes
 }
 
+function benchmark(num) {
+  let i=0
+  while (i < num) {
+    i++
+  }
+}
+
+function largestPrimeFactor(num) {
+  const primes = getPrimesUpTo(num/2) 
+  for (i=primes.length-1; i>=0; i--) {
+    if (num % primes[i] === 0) return primes[i]
+  }
+  return 1
+}
 
 
 describe("largest prime factor", () => {
@@ -25,8 +48,18 @@ describe("largest prime factor", () => {
     expect(getPrimesUpTo(100)).toEqual([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97])
   });
 
-  test("getFactors", () => {
-    expect(getFactors(10)).toEqual([1,2,5,10])
-    expect(getFactors(30)).toEqual([1,2,3,5,6,10,15,30])
+  test("getLargestPrimeFactor", () => {
+    expect(largestPrimeFactor(10)).toEqual(5)
+    expect(largestPrimeFactor(14)).toEqual(7)
+    expect(largestPrimeFactor(21)).toEqual(7)
+    expect(largestPrimeFactor(121)).toEqual(11)
+  })
+
+  const TEST_VALUE = 600851475143
+  test("sandbox", () => {
+    console.time('lpf')
+    // console.log(largestPrimeFactor(1000000))
+    benchmark(10000000000)
+    console.timeEnd('lpf')
   })
 });
